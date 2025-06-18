@@ -28,5 +28,6 @@ cdn.jsdelivr.net +本地SS
 *.v2ex.com +本地SS
 *.pting.club +本地SS
 *.linux.do +本地SS
+*.reddit.com +本地SS
 
 * +direct
