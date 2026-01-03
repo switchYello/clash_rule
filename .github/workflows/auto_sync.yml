@@ -1,0 +1,43 @@
+name: Auto Sync Local Rules
+
+# 触发条件：当 rule 文件夹或 url 文件夹下的文件被 push 时
+on:
+  push:
+    paths:
+      - 'rule/**'
+      - 'url/**'
+      - 'convert_to_local.sh'
+  workflow_dispatch: # 允许手动点击按钮触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # 授予写入权限，以便 Actions 能够把生成的文件 push 回仓库
+    permissions:
+      contents: write
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. 给脚本执行权限并运行
+      - name: Run Convert Script
+        run: |
+          chmod +x convert_to_local.sh
+          ./convert_to_local.sh
+
+      # 3. 提交并推送更改
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add local_rule/
+          # 检查是否有文件变动，防止空提交报错
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto sync: update local_rule [skip ci]"
+            git push
+          fi
