@@ -27,9 +27,11 @@ process_ini_file() {
     output_file="$2"
 
     # 创建目录
-    local_rule_url_dir="local_rule/url"
+    local_rule_dir="local_rule"
+    local_rule_url_dir="${local_rule_dir}/url"
+    create_directory "$local_rule_dir"
     create_directory "$local_rule_url_dir"
-    create_directory "local_rule"
+    
 
     # 读取输入文件
     echo "读取文件 $input_file..."
@@ -38,18 +40,17 @@ process_ini_file() {
     while IFS= read -r line; do
         # 如果该行包含 URL（假设 URL 在逗号后的部分）
         if [[ "$line" =~ ^ruleset=.+,https?:// ]]; then
-            # 提取描述和 URL
-            description=$(echo "$line" | cut -d',' -f1 | sed 's/^ruleset=//')
+            # 获取下载链接
             url=$(echo "$line" | cut -d',' -f2)
             # 提取文件名
             file_name=$(basename "$url")
+            #下载位置
             local_file_path="$local_rule_url_dir/$file_name"
 
             # 下载文件
             if download_file "$url" "$local_file_path"; then
-                # 下载成功，替换为相对路径
-                relative_path=$(realpath --relative-to="local_rule" "$local_file_path")
-                updated_value="$description,$relative_path"
+                # 下载成功，将url替换为相对路径，这种写法不需要考虑定界符冲突，也不需要调用外部 sed 进程
+                updated_value="${line//"$url"/"$local_file_path"}"
                 echo "$updated_value" >> "$output_file"
             else
                 # 下载失败，保持原样
