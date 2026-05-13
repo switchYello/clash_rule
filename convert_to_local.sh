@@ -28,10 +28,16 @@ process_ini_file() {
     group_part="$3"
     rules_part="$4"
 
+    local_rule_dir='local_rule'
+    local_rule_url_dir='local_rule/url'
+    create_directory "$local_rule_dir"
+    create_directory "$local_rule_url_dir"
+
     # 先清空输出文件，确保每次覆盖
     echo '' > "$output_file"
     echo '' > "$group_part"
     echo '' > "$rules_part"
+
 
     # 读取输入文件
     echo "读取文件 $input_file..."
@@ -74,10 +80,6 @@ process_ini_file() {
 
 # 主函数
 main() {
-    # 创建目录
-    create_directory "local_rule"
-    create_directory "local_rule/url"
-
     # 转换
     input_ini_file="rule/ShellClash_Custom.ini"               # 输入文件路径
     output_ini_file="local_rule/ShellClash_Custom_Local.ini"  # 输出文件路径
