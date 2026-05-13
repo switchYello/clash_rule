@@ -25,18 +25,16 @@ download_file() {
 process_ini_file() {
     input_file="$1"
     output_file="$2"
+    group_part="$3"
+    rules_part="$4"
 
-    # 创建目录
-    local_rule_dir="local_rule"
-    local_rule_url_dir="${local_rule_dir}/url"
-    create_directory "$local_rule_dir"
-    create_directory "$local_rule_url_dir"
-    
+    # 先清空输出文件，确保每次覆盖
+    echo '' > "$output_file"
+    echo '' > "$group_part"
+    echo '' > "$rules_part"
 
     # 读取输入文件
     echo "读取文件 $input_file..."
-    echo '' > "$output_file"  # 先清空输出文件，确保每次覆盖
-
     while IFS= read -r line; do
         # 如果该行包含 URL（假设 URL 在逗号后的部分）
         if [[ "$line" =~ ^ruleset=.+,https?:// ]]; then
@@ -61,14 +59,32 @@ process_ini_file() {
             echo "$line" >> "$output_file"
         fi
     done < "$input_file"
+    
+    # 分离 group 和 rule
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^custom_proxy_group=.+ ]]; then
+           echo "$line" >> "$group_part"
+        fi
+        if [[ "$line" =~ ^ruleset=.+ ]]; then
+           echo "$line" >> "$rules_part"
+        fi
+    done < "$output_file"
+
 }
 
 # 主函数
 main() {
-    input_ini_file="rule/ShellClash_Custom.ini"  # 输入文件路径
+    # 创建目录
+    create_directory "local_rule"
+    create_directory "local_rule/url"
+
+    # 转换
+    input_ini_file="rule/ShellClash_Custom.ini"               # 输入文件路径
     output_ini_file="local_rule/ShellClash_Custom_Local.ini"  # 输出文件路径
+    groups="local_rule/groups.ini"
+    rulesets="local_rule/rulesets.ini"
     echo "输出文件: $output_ini_file"
-    process_ini_file "$input_ini_file" "$output_ini_file"
+    process_ini_file "$input_ini_file" "$output_ini_file" "$groups" "$rulesets"
     echo "处理完成！"
 }
 
