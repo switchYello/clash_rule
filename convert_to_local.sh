@@ -37,7 +37,7 @@ process_ini_file() {
     echo '' > "$output_file"
     echo '' > "$group_part"
     echo '' > "$rules_part"
-    rm -rf "${local_rule_url_dir}/*"
+    rm -rf "${local_rule_url_dir}"/*
 
     # 读取输入文件
     echo "读取文件 $input_file..."
